@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>インベーダーゲーム 商用リリース タスク図解</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0e1a;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: #fff;
+}
+.subtitle {
+  text-align: center;
+  color: #888;
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.legend-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+.dot-human { background: #f97316; }
+.dot-ai { background: #3b82f6; }
+.dot-collab { background: linear-gradient(135deg, #f97316 50%, #3b82f6 50%); }
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Phase */
+.phase {
+  margin-bottom: 36px;
+  background: #111827;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #1e293b;
+}
+.phase-header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.phase-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.phase-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: #1e293b;
+}
+.col-header {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+.col-human { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+.col-collab { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+.col-ai { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+.task-cell {
+  background: #111827;
+  padding: 12px 16px;
+  min-height: 60px;
+}
+.task {
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  position: relative;
+}
+.task:last-child { margin-bottom: 0; }
+.task-human {
+  background: rgba(249, 115, 22, 0.12);
+  border-left: 3px solid #f97316;
+}
+.task-ai {
+  background: rgba(59, 130, 246, 0.12);
+  border-left: 3px solid #3b82f6;
+}
+.task-collab {
+  background: rgba(168, 85, 247, 0.12);
+  border-left: 3px solid #a855f7;
+}
+.task-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.task-desc {
+  font-size: 11px;
+  color: #9ca3af;
+}
+.task-icon {
+  float: right;
+  font-size: 18px;
+  margin-left: 8px;
+}
+
+/* Flow arrow */
+.flow-arrow {
+  text-align: center;
+  padding: 8px;
+  color: #4b5563;
+  font-size: 24px;
+}
+
+/* Summary */
+.summary {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+.summary-card {
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}
+.summary-card h3 {
+  font-size: 14px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.summary-card .num {
+  font-size: 36px;
+  font-weight: 800;
+}
+.summary-card .label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+.card-human {
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  color: #f97316;
+}
+.card-collab {
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #a855f7;
+}
+.card-ai {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
+}
+
+.note {
+  margin-top: 32px;
+  padding: 20px 24px;
+  background: #1e1b2e;
+  border: 1px solid #a855f740;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #c4b5fd;
+}
+.note strong { color: #e9d5ff; }
+
+@media (max-width: 768px) {
+  .phase-body { grid-template-columns: 1fr; }
+  .summary { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<h1>Space Invaders 商用リリース タスク図解</h1>
+<p class="subtitle">ブラウザゲームを正式プロダクトとして公開販売するために必要なタスクの分類</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot dot-human"></div> 人の手が必要</div>
+  <div class="legend-item"><div class="legend-dot dot-collab"></div> 人 + AI 協業</div>
+  <div class="legend-item"><div class="legend-dot dot-ai"></div> AIに任せられる</div>
+</div>
+
+<div class="container">
+
+<!-- Phase 1 -->
+<div class="phase">
+  <div class="phase-header" style="background: linear-gradient(90deg, #1e293b, #111827);">
+    <div class="phase-num" style="background: #6366f1;">1</div>
+    <span>法務・ビジネス準備</span>
+  </div>
+  <div class="phase-body">
+    <div class="col-header col-human">人の手が必要</div>
+    <div class="col-header col-collab">人 + AI 協業</div>
+    <div class="col-header col-ai">AIに任せられる</div>
+    <div class="task-cell">
+      <div class="task task-human">
+        <div class="task-icon">&#9878;</div>
+        <div class="task-title">特商法に基づく表記の届出</div>
+        <div class="task-desc">事業者名・住所・連絡先など法的に本人確認が必要</div>
+      </div>
+      <div class="task task-human">
+        <div class="task-icon">&#128182;</div>
+        <div class="task-title">販売プラットフォーム登録</div>
+        <div class="task-desc">Steam / itch.io / App Store 等のアカウント開設・本人確認</div>
+      </div>
+      <div class="task task-human">
+        <div class="task-icon">&#128176;</div>
+        <div class="task-title">価格設定の最終決定</div>
+        <div class="task-desc">ビジネス判断・市場ポジショニング</div>
+      </div>
+    </div>
+    <div class="task-cell">
+      <div class="task task-collab">
+        <div class="task-icon">&#128221;</div>
+        <div class="task-title">利用規約・プライバシーポリシー</div>
+        <div class="task-desc">AIがドラフト作成 → 弁護士/人がレビュー・最終確認</div>
+      </div>
+      <div class="task task-collab">
+        <div class="task-icon">&#128202;</div>
+        <div class="task-title">競合調査・価格リサーチ</div>
+        <div class="task-desc">AIがデータ収集・分析 → 人が戦略判断</div>
+      </div>
+    </div>
+    <div class="task-cell">
+      <div class="task task-ai">
+        <div class="task-icon">&#128196;</div>
+        <div class="task-title">ライセンス文書の生成</div>
+        <div class="task-desc">OSSライセンス確認・NOTICE ファイル作成</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="flow-arrow">&#9660;</div>
+
+<!-- Phase 2 -->
+<div class="phase">
+  <div class="phase-header" style="background: linear-gradient(90deg, #1e293b, #111827);">
+    <div class="phase-num" style="background: #06b6d4;">2</div>
+    <span>プロダクト品質の向上</span>
+  </div>
+  <div class="phase-body">
+    <div class="col-header col-human">人の手が必要</div>
+    <div class="col-header col-collab">人 + AI 協業</div>
+    <div class="col-header col-ai">AIに任せられる</div>
+    <div class="task-cell">
+      <div class="task task-human">
+        <div class="task-icon">&#127912;</div>
+        <div class="task-title">ゲームデザインの方向性決定</div>
+        <div class="task-desc">難易度バランス・ゲーム性のクリエイティブ判断</div>
+      </div>
+      <div class="task task-human">
+        <div class="task-icon">&#127911;</div>
+        <div class="task-title">BGM・効果音の制作 / 購入</div>
+        <div class="task-desc">音楽の著作権処理・ライセンス取得が必要</div>
+      </div>
+      <div class="task task-human">
+        <div class="task-icon">&#128065;</div>
+        <div class="task-title">最終的なプレイテスト</div>
+        <div class="task-desc">実際にプレイして「楽しいか」を人が判断</div>
+      </div>
+    </div>
+    <div class="task-cell">
+      <div class="task task-collab">
+        <div class="task-icon">&#127912;</div>
+        <div class="task-title">UIデザイン改善</div>
+        <div class="task-desc">人がデザイン指示 → AIが実装</div>
+      </div>
+      <div class="task task-collab">
+        <div class="task-icon">&#128295;</div>
+        <div class="task-title">バグ修正・デバッグ</div>
+        <div class="task-desc">人がバグ報告 → AIが原因特定・修正</div>
+      </div>
+    </div>
+    <div class="task-cell">
+      <div class="task task-ai">
+        <div class="task-icon">&#128187;</div>
+        <div class="task-title">コードリファクタリング</div>
+        <div class="task-desc">パフォーマンス最適化・コード分割・モジュール化</div>
+      </div>
+      <div class="task task-ai">
+        <div class="task-icon">&#128241;</div>
+        <div class="task-title">レスポンシブ対応の強化</div>
+        <div class="task-desc">各デバイスサイズへの自動調整</div>
+      </div>
+      <div class="task task-ai">
+        <div class="task-icon">&#9989;</div>
+        <div class="task-title">自動テスト作成</div>
+        <div class="task-desc">ユニットテスト・E2Eテストの実装</div>
+      </div>
+      <div class="task task-ai">
+        <div class="task-icon">&#9855;</div>
+        <div class="task-title">アクセシビリティ対応</div>
+        <div class="task-desc">キーボード操作・ARIA属性・色覚配慮</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="flow-arrow">&#9660;</div>
+
+<!-- Phase 3 -->
+<div class="phase">
+  <div class="phase-header" style="background: linear-gradient(90deg, #1e293b, #111827);">
+    <div class="phase-num" style="background: #10b981;">3</div>
+    <span>リリース準備</span>
+  </div>
+  <div class="phase-body">
+    <div class="col-header col-human">人の手が必要</div>
+    <div class="col-header col-collab">人 + AI 協業</div>
+    <div class="col-header col-ai">AIに任せられる</div>
+    <div class="task-cell">
+      <div class="task task-human">
+        <div class="task-icon">&#128272;</div>
+        <div class="task-title">ドメイン取得・SSL証明書</div>
+        <div class="task-desc">支払い・所有者情報の登録</div>
+      </div>
+      <div class="task task-human">
+        <div class="task-icon">&#128179;</div>
+        <div class="task-title">決済システム連携</div>
+        <div class="task-desc">Stripe等の本人確認・口座登録</div>
+      </div>
+    </div>
+    <div class="task-cell">
+      <div class="task task-collab">
+        <div class="task-icon">&#128640;</div>
+        <div class="task-title">ストアページ作成</div>
+        <div class="task-desc">AIがコピー・スクショ作成 → 人が確認・投稿</div>
+      </div>
+      <div class="task task-collab">
+        <div class="task-icon">&#127760;</div>
+        <div class="task-title">多言語対応</div>
+        <div class="task-desc">AIが翻訳 → ネイティブ話者がレビュー</div>
+      </div>
+    </div>
+    <div class="task-cell">
+      <div class="task task-ai">
+        <div class="task-icon">&#128230;</div>
+        <div class="task-title">ビルド・バンドル最適化</div>
+        <div class="task-desc">Minify, Tree-shaking, アセット最適化</div>
+      </div>
+      <div class="task task-ai">
+        <div class="task-icon">&#128736;</div>
+        <div class="task-title">CI/CD パイプライン構築</div>
+        <div class="task-desc">GitHub Actions でのデプロイ自動化</div>
+      </div>
+      <div class="task task-ai">
+        <div class="task-icon">&#128270;</div>
+        <div class="task-title">SEO・メタタグ最適化</div>
+        <div class="task-desc">OGP設定・構造化データ・sitemap生成</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="flow-arrow">&#9660;</div>
+
+<!-- Phase 4 -->
+<div class="phase">
+  <div class="phase-header" style="background: linear-gradient(90deg, #1e293b, #111827);">
+    <div class="phase-num" style="background: #f43f5e;">4</div>
+    <span>マーケティング・運用</span>
+  </div>
+  <div class="phase-body">
+    <div class="col-header col-human">人の手が必要</div>
+    <div class="col-header col-collab">人 + AI 協業</div>
+    <div class="col-header col-ai">AIに任せられる</div>
+    <div class="task-cell">
+      <div class="task task-human">
+        <div class="task-icon">&#127908;</div>
+        <div class="task-title">インフルエンサー・メディア連携</div>
+        <div class="task-desc">人間関係の構築・交渉が必要</div>
+      </div>
+      <div class="task task-human">
+        <div class="task-icon">&#128172;</div>
+        <div class="task-title">コミュニティ運営</div>
+        <div class="task-desc">Discord / SNS でのユーザー対応・判断</div>
+      </div>
+      <div class="task task-human">
+        <div class="task-icon">&#128200;</div>
+        <div class="task-title">売上管理・税務処理</div>
+        <div class="task-desc">確定申告・経理は本人対応が必要</div>
+      </div>
+    </div>
+    <div class="task-cell">
+      <div class="task task-collab">
+        <div class="task-icon">&#128227;</div>
+        <div class="task-title">SNSプロモーション</div>
+        <div class="task-desc">AIが投稿案作成 → 人がレビュー・投稿</div>
+      </div>
+      <div class="task task-collab">
+        <div class="task-icon">&#128233;</div>
+        <div class="task-title">ユーザーサポート</div>
+        <div class="task-desc">AIが一次対応 → 複雑な問題は人がエスカレーション</div>
+      </div>
+    </div>
+    <div class="task-cell">
+      <div class="task task-ai">
+        <div class="task-icon">&#128202;</div>
+        <div class="task-title">アクセス解析・レポート</div>
+        <div class="task-desc">Google Analytics 設定・データ集計・可視化</div>
+      </div>
+      <div class="task task-ai">
+        <div class="task-icon">&#128260;</div>
+        <div class="task-title">アップデート・パッチ開発</div>
+        <div class="task-desc">機能追加・バグ修正のコード実装</div>
+      </div>
+      <div class="task task-ai">
+        <div class="task-icon">&#128225;</div>
+        <div class="task-title">サーバー監視・アラート</div>
+        <div class="task-desc">ダウンタイム検知・自動通知設定</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="summary">
+  <div class="summary-card card-human">
+    <h3>人の手が必要</h3>
+    <div class="num">11</div>
+    <div class="label">法務・判断・対人・クリエイティブ</div>
+  </div>
+  <div class="summary-card card-collab">
+    <h3>人 + AI 協業</h3>
+    <div class="num">7</div>
+    <div class="label">AIがドラフト → 人が最終判断</div>
+  </div>
+  <div class="summary-card card-ai">
+    <h3>AIに任せられる</h3>
+    <div class="num">10</div>
+    <div class="label">コード・自動化・分析・最適化</div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>ポイント:</strong><br>
+  ・<strong>法的責任</strong>を伴うタスク（特商法・税務・契約）は必ず人の手が必要<br>
+  ・<strong>クリエイティブ判断</strong>（面白さ・デザイン方針）は人が主導すべき<br>
+  ・<strong>コード実装・最適化・データ分析</strong>はAIが最も得意な領域<br>
+  ・<strong>文書作成・翻訳・サポート</strong>はAIがドラフトし人が品質保証する協業が効率的<br>
+  ・全28タスク中、完全に人だけで行うのは約40%。AIを活用すれば工数を大幅に削減可能
+</div>
+
+</div>
+</body>
+</html>
